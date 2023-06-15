@@ -101,6 +101,9 @@ class AStar:
             if self.path[i-1][0] == self.path[i+1][0] and self.path[i][0] == self.path[i-1][0] + 1:
                 if not map.IsObstacle(self.path[i][0], self.path[i][1]):
                     self.path[i][0] = self.path[i-1][0]
+            if self.path[i-1][0] == self.path[i+1][0] and self.path[i][0] == self.path[i-1][0] - 1:
+                if not map.IsObstacle(self.path[i][0], self.path[i][1]):
+                    self.path[i][0] = self.path[i-1][0]
         #
         for p in self.path:
             map.mp[p[0] : p[0] + 1,p[1]: p[1] + 1] = 15

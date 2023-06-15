@@ -26,11 +26,15 @@ for x in m:
     mp[ 3:27,x:x + 1] = 6
 mp[14:15, 10:13] = 6
 # mp[10:13,14:15] = 6
-mp[16:17,10:13] = 6
+mp[16:17, 10:13] = 6
 # mp[10:13,16:17] = 6
-mp[15:16,10:11] = 6
-mp[15:16,12:13] = 6
+mp[15:16, 10:11] = 6
+mp[15:16, 12:13] = 6
+mp[6:9, 3:4] = 6
+mp[6:9, 4:5] = 6
+
 mp[15:16,11:12]= 4
+mp[7:8,3:4] = 4
 
 
 
@@ -52,6 +56,21 @@ np.save('./data/mp.npy',mp)
 
 
 def IsObstacle(i, j):
-    if mp[i, j] == 1 or mp[i, j] == 9 or mp[i, j] == 0:
+    if mp[i, j] == 1 or mp[i, j] == 9 or mp[i, j] == 0 or mp[i, j] == 15:
         return True
     return False
+
+def ObtainObstacle(path):
+    for i in range(0, len(path) - 2):
+        if path[i][0] + 1 == path[i+1][0] and path[i][1] - 1 == path[i+1][1]:
+            mp[path[i][0], path[i][1] - 1] = 1
+            mp[path[i][0] + 1, path[i][1]] = 1
+        if path[i][0] - 1 == path[i+1][0] and path[i][1] - 1 == path[i+1][1]:
+            mp[path[i][0], path[i][1] - 1] = 1
+            mp[path[i][0] - 1, path[i][1]] = 1
+        if path[i][0] - 1 == path[i+1][0] and path[i][1] + 1 == path[i+1][1]:
+            mp[path[i][0], path[i][1] + 1] = 1
+            mp[path[i][0] - 1, path[i][1]] = 1
+        if path[i][0] + 1 == path[i+1][0] and path[i][1] + 1 == path[i+1][1]:
+            mp[path[i][0], path[i][1] + 1] = 1
+            mp[path[i][0] + 1, path[i][1]] = 1

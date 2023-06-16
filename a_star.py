@@ -41,7 +41,7 @@ class AStar:
     def IsValidPoint(self, x, y):
         if x < 0 or y < 0:
             return False
-        if x >= 30 or y >= 30:
+        if x >= 100 or y >= 100:
             return False
         return not map.IsObstacle(x, y)
 
@@ -106,7 +106,7 @@ class AStar:
                     self.path[i][0] = self.path[i-1][0]
         #
         for p in self.path:
-            map.mp[p[0] : p[0] + 1,p[1]: p[1] + 1] = 15
+            map.mp[0, p[0] : p[0] + 1,p[1]: p[1] + 1] = 15
 
         # # 获取当前窗口的Surface对象
         # surface = pygame.display.get_surface()

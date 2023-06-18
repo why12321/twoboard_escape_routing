@@ -29,17 +29,17 @@ for a in m:
 for x in m:
     mp[0, x:x + 1,3:97] = 6
     mp[0, 3:97, x:x + 1] = 6
-mp[0, 14:15, 10:13] = 6
+# mp[0, 14:15, 10:13] = 6
 # mp[10:13,14:15] = 6
-mp[0, 16:17, 10:13] = 6
+# mp[0, 16:17, 10:13] = 6
 # mp[10:13,16:17] = 6
-mp[0, 15:16, 10:11] = 6
-mp[0, 15:16, 12:13] = 6
-mp[0, 6:9, 3:4] = 6
-mp[0, 6:9, 4:5] = 6
+# mp[0, 15:16, 10:11] = 6
+# mp[0, 15:16, 12:13] = 6
+# mp[0, 6:9, 3:4] = 6
+# mp[0, 6:9, 4:5] = 6
 
-mp[0, 15:16,11:12]= 4
-mp[0, 7:8,3:4] = 4
+# mp[0, 15:16,11:12]= 4
+# mp[0, 7:8,3:4] = 4
 
 
 
@@ -91,10 +91,13 @@ mp[1, :,0]=1
 mp[1, :,-1]=1
 
 
-plt.imshow(mp[0])
-plt.show()
-plt.imshow(mp[1])
-plt.show()
+# plt.imshow(mp[0])
+# plt.show()
+# plt.imshow(mp[1])
+# plt.show()
+
+start_point = [[38, 40], [59, 41], [42, 51], [54, 48], [61, 37], [59, 49], [57, 40], [38, 45]]
+end_point = [[39, 19], [79, 83], [79, 79], [95, 83], [11, 11], [63, 95], [19, 19], [79, 23]]
 
 if not os.path.exists('./data'):
     os.makedirs('./data')
@@ -104,22 +107,56 @@ if not os.path.exists('./data'):
 np.save('./data/mp[1].npy',mp[1])
 
 
-def IsObstacle(i, j):
-    if mp[0, i, j] == 1 or mp[0, i, j] == 9 or mp[0, i, j] == 0 or mp[0, i, j] == 15:
+def IsObstacle(i, j, k):
+    if mp[i, j, k] == 1 or mp[i, j, k] == 9 or mp[i, j, k] == 0 or mp[i, j, k] == 15:
         return True
     return False
 
-def ObtainObstacle(path):
-    for i in range(0, len(path) - 2):
-        if path[i][0] + 1 == path[i+1][0] and path[i][1] - 1 == path[i+1][1]:
-            mp[0, path[i][0], path[i][1] - 1] = 1
-            mp[0, path[i][0] + 1, path[i][1]] = 1
-        if path[i][0] - 1 == path[i+1][0] and path[i][1] - 1 == path[i+1][1]:
-            mp[0, path[i][0], path[i][1] - 1] = 1
-            mp[0, path[i][0] - 1, path[i][1]] = 1
-        if path[i][0] - 1 == path[i+1][0] and path[i][1] + 1 == path[i+1][1]:
-            mp[0, path[i][0], path[i][1] + 1] = 1
-            mp[0, path[i][0] - 1, path[i][1]] = 1
-        if path[i][0] + 1 == path[i+1][0] and path[i][1] + 1 == path[i+1][1]:
-            mp[0, path[i][0], path[i][1] + 1] = 1
-            mp[0, path[i][0] + 1, path[i][1]] = 1
+def ObtainObstacle(path,j):
+    for i in range(0, len(path)):
+        if mp[j, path[i][0] - 1, path[i][1] + 1] != 15:
+            mp[j, path[i][0] - 1, path[i][1] + 1] = 1
+        if mp[j, path[i][0] - 1, path[i][1]] != 15:
+            mp[j, path[i][0] - 1, path[i][1]] = 1
+        if mp[j, path[i][0] - 1, path[i][1] - 1] != 15:
+            mp[j, path[i][0] - 1, path[i][1] - 1] = 1
+        if mp[j, path[i][0], path[i][1] - 1] != 15:
+            mp[j, path[i][0], path[i][1] - 1] = 1
+        if mp[j, path[i][0] + 1, path[i][1] - 1] != 15:
+            mp[j, path[i][0] + 1, path[i][1] - 1] = 1
+        if mp[j, path[i][0] + 1, path[i][1]] != 15:
+            mp[j, path[i][0] + 1, path[i][1]] = 1
+        if mp[j, path[i][0] + 1, path[i][1] + 1] != 15:
+            mp[j, path[i][0] + 1, path[i][1] + 1] = 1
+        if mp[j, path[i][0], path[i][1] + 1] != 15:
+            mp[j, path[i][0], path[i][1] + 1] = 1
+
+
+
+def point_is_available(i, point_x, point_y):
+    if mp[i, point_x - 1, point_y + 1] == 9 or mp[i, point_x - 1, point_y] == 9 \
+       or mp[i, point_x - 1, point_y - 1] == 9 or mp[i, point_x, point_y - 1] == 9 \
+       or mp[i, point_x + 1, point_y - 1] == 9 or mp[i, point_x + 1, point_y] == 9 \
+       or mp[i, point_x + 1, point_y + 1] == 9 or mp[i, point_x, point_y + 1] == 9:
+        return False
+    return True
+
+
+
+def set_start_end_point_routable(i, start_end_point_x, start_end_point_y):
+    if point_is_available(i, start_end_point_x - 1, start_end_point_y + 1):
+        mp[i, start_end_point_x - 1, start_end_point_y + 1] = 6
+    if point_is_available(i, start_end_point_x - 1, start_end_point_y):
+        mp[i, start_end_point_x - 1, start_end_point_y] = 6
+    if point_is_available(i, start_end_point_x - 1, start_end_point_y - 1):
+        mp[i, start_end_point_x - 1, start_end_point_y - 1] = 6
+    if point_is_available(i, start_end_point_x, start_end_point_y - 1):
+        mp[i, start_end_point_x, start_end_point_y - 1] = 6
+    if point_is_available(i, start_end_point_x + 1, start_end_point_y - 1):
+        mp[i, start_end_point_x + 1, start_end_point_y - 1] = 6
+    if point_is_available(i, start_end_point_x + 1, start_end_point_y):
+        mp[i, start_end_point_x + 1, start_end_point_y] = 6
+    if point_is_available(i, start_end_point_x + 1, start_end_point_y + 1):
+        mp[i, start_end_point_x + 1, start_end_point_y + 1] = 6
+    if point_is_available(i, start_end_point_x, start_end_point_y + 1):
+        mp[i, start_end_point_x, start_end_point_y + 1] = 6

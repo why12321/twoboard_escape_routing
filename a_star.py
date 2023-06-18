@@ -1,7 +1,7 @@
 # a_star.py
 
 import sys
-import time
+
 
 import numpy as np
 
@@ -13,8 +13,8 @@ import map
 # import random_map
 
 class AStar:
-    def __init__(self, map_1, StartPoint_x, StartPoint_y, EndPoint_x, EndPoint_y):
-        self.map = map_1
+    def __init__(self, i, StartPoint_x, StartPoint_y, EndPoint_x, EndPoint_y):
+        self.i = i
         self.StartPoint_x = StartPoint_x
         self.StartPoint_y = StartPoint_y
         self.EndPoint_x = EndPoint_x
@@ -22,6 +22,7 @@ class AStar:
         self.open_set = []
         self.close_set = []
         self.path = []
+        self.need_via = 0
 
     def BaseCost(self, p):
         x_dis = np.abs(p.x - self.StartPoint_x)
@@ -36,14 +37,14 @@ class AStar:
         return x_dis + y_dis + (np.sqrt(2) - 2) * min(x_dis, y_dis)
 
     def TotalCost(self, p):
-        return self.BaseCost(p) + self.HeuristicCost(p)
+        return 0.2 * self.BaseCost(p) + 0.8 * self.HeuristicCost(p)
 
     def IsValidPoint(self, x, y):
         if x < 0 or y < 0:
             return False
         if x >= 100 or y >= 100:
             return False
-        return not map.IsObstacle(x, y)
+        return not map.IsObstacle(self.i, x, y)
 
     def IsInPointList(self, p, point_list):
         for point in point_list:
@@ -87,7 +88,7 @@ class AStar:
             index += 1
         return selected_index
 
-    def BuildPath(self, p, start_time):
+    def BuildPath(self, p):
         # path = []
         while True:
             self.path.insert(0, [p.x, p.y]) # Insert first
@@ -99,14 +100,20 @@ class AStar:
             if i == len(self.path) - 2:
                 break
             if self.path[i-1][0] == self.path[i+1][0] and self.path[i][0] == self.path[i-1][0] + 1:
-                if not map.IsObstacle(self.path[i][0], self.path[i][1]):
+                if not map.IsObstacle(self.i, self.path[i][0], self.path[i][1]):
                     self.path[i][0] = self.path[i-1][0]
             if self.path[i-1][0] == self.path[i+1][0] and self.path[i][0] == self.path[i-1][0] - 1:
-                if not map.IsObstacle(self.path[i][0], self.path[i][1]):
+                if not map.IsObstacle(self.i, self.path[i][0], self.path[i][1]):
                     self.path[i][0] = self.path[i-1][0]
+            if self.path[i-1][1] == self.path[i+1][1] and self.path[i][1] == self.path[i-1][1] - 1:
+                if not map.IsObstacle(self.i, self.path[i][0], self.path[i][1]):
+                    self.path[i][1] = self.path[i-1][1]
+            if self.path[i-1][1] == self.path[i+1][1] and self.path[i][1] == self.path[i-1][1] + 1:
+                if not map.IsObstacle(self.i, self.path[i][0], self.path[i][1]):
+                    self.path[i][1] = self.path[i-1][1]
         #
         for p in self.path:
-            map.mp[0, p[0] : p[0] + 1,p[1]: p[1] + 1] = 15
+            map.mp[self.i, p[0] : p[0] + 1,p[1]: p[1] + 1] = 15
 
         # # 获取当前窗口的Surface对象
         # surface = pygame.display.get_surface()
@@ -115,11 +122,10 @@ class AStar:
         # screenshot.blit(surface, (0, 0))
         # # 将新的Surface对象保存为图像文件
         # pygame.image.save(screenshot, "routed.png")
-        end_time = time.time()
-        print('===== Algorithm finish in', int(end_time-start_time), ' seconds')
+
 
     def RunAndSaveImage(self):
-        start_time = time.time()
+
 
         start_point = point.Point(self.StartPoint_x, self.StartPoint_y)
         start_point.cost = 0
@@ -128,8 +134,13 @@ class AStar:
         while True:
             index = self.SelectPointInOpenList()
             if index < 0:
-                print('No path found, algorithm failed!!!')
-                return
+                if self.i == 1:
+                    print('No path found in surface, need via')
+                    self.need_via = 1
+                    return
+                if self.i == 0:
+                    print('No path found in base, algorithm failed!!!')
+                    return
             p = self.open_set[index]
             # rec = Rectangle((p.x, p.y), 1, 1, color='c')
             # ax.add_patch(rec)
@@ -139,7 +150,7 @@ class AStar:
             # pygame.draw.circle(map.screen, map.GREY, (p.x, p.y), 1)
 
             if self.IsEndPoint(p):
-                return self.BuildPath(p, start_time)
+                return self.BuildPath(p)
 
             del self.open_set[index]
             self.close_set.append(p)
